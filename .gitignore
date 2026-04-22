@@ -1,3 +1,7 @@
 /claude-statusline
 /dist/
 *.test
+
+# Claude Code per-user / ephemeral state — shared .claude/settings.json stays tracked.
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
