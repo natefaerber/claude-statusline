@@ -1,0 +1,31 @@
+# Changelog
+
+All notable changes to this project are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.1.0] - 2026-04-22
+
+Initial public release.
+
+### Added
+
+- TOML-driven multi-line statusline for Claude Code. Each `[[lines]]` entry is a list of named segments joined by a configurable separator (or a cycling `separators` list).
+- 31 segments across four sources:
+  - **Input JSON**: `model`, `context_bar`, `context_value`, `project`, `usage_5h`, `usage_7d`, `cost`, `duration`, `tokens`, `cache`, `diff`, `burn`, `todos`, `session_name`, `agent`, `vim_mode`, `output_style`, `version`, `worktree`, `custom`.
+  - **git**: `git`, `unpushed`, `stash`, `branch_diff`, `last_commit`.
+  - **`gh` CLI** (cached 30s): `ci`, `pr`, `pr_checks`, `pending_review`.
+  - **External processes**: `compose`, `endpoints`, `pomodoro`.
+- Per-segment and per-line separator overrides; cycling separators list.
+- Full color palette override via `[colors]` table — ANSI names, 256-color indices, or truecolor hex.
+- `claude-statusline pomo {start [minutes]|stop|status}` subcommand for a session-local pomodoro timer.
+- `claude-statusline endpoint {add|rm|list|clear|path}` subcommand for managing per-project `.endpoint` files.
+- `claude-statusline --version` / `-v` / `version` with `main.version`, `main.commit`, `main.date` injected at release build time.
+- Per-session state in `$XDG_CACHE_HOME/claude-statusline/` (pomodoro, burn peak, cache low watermark).
+- Short-lived caches in `$TMPDIR` for `gh` (30s) and `docker compose` (10s).
+- GoReleaser v2 cross-builds for linux / macOS / windows × amd64 / arm64.
+- GitHub Actions: `ci` (gofmt / vet / test / build) and `release` (GoReleaser on `v*` tag).
+- MIT License.
+
+[Unreleased]: https://github.com/natefaerber/claude-statusline/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/natefaerber/claude-statusline/releases/tag/v0.1.0
