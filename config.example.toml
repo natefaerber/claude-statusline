@@ -1,0 +1,74 @@
+# claude-statusline config — drop at ~/.config/claude-statusline/config.toml
+#
+# Each [[lines]] entry produces one rendered line. Segments inside a line are
+# joined by `separator`. A segment that returns no content (e.g. git when not
+# in a repo) is silently dropped.
+#
+# Available segment names: model, context_bar, context_value, project, git,
+# usage_5h, usage_7d, cost, duration, tokens, cache, diff, unpushed, ci, pr,
+# pr_checks, stash, branch_diff, last_commit, pending_review, session_name,
+# agent, vim_mode, output_style, version, worktree, custom
+#
+# Notes:
+#   diff           = +N -M lines added/removed this session (cost.total_lines_*)
+#   unpushed       = ↑N ↓M commits ahead/behind upstream
+#   ci             = latest commit's CI rollup for current branch (needs `gh`, cached 30s)
+#   pr             = open PR for current branch + review state (needs `gh`, cached 30s)
+#   pr_checks      = full PR check rollup incl. non-Actions checks (needs `gh`, cached 30s)
+#   stash          = 📦 N when `git stash list` has entries
+#   branch_diff    = +N -M lines vs base_branch (default "main"), drops on the base itself
+#   last_commit    = "commit Xm ago" — nudges you to commit
+#   pending_review = 👁 N PRs across the org with you as a requested reviewer (needs `gh`, cached 30s)
+
+separator = " │ "
+
+[[lines]]
+segments = ["model", "agent", "vim_mode"]
+
+[[lines]]
+segments = ["project", "git", "worktree"]
+
+[[lines]]
+segments = ["context_bar", "usage_5h", "usage_7d"]
+
+[[lines]]
+segments = ["duration", "tokens"]
+
+[segments]
+path_levels = 1
+context_value = "percent"     # percent | tokens | both | remaining
+git_show_dirty = true
+git_show_file_stats = true
+git_show_ahead_behind = false
+usage_bar = true
+bar_width = 10
+custom_line = ""
+# Hide the `tokens` segment until context usage hits this percent.
+# 0 = always show, 85 = only show when you're actually approaching the limit.
+tokens_min_context_pct = 85
+
+# Color overrides. Values accept anything lipgloss does:
+#   - ANSI names: "red", "green", "brightCyan", etc.
+#   - 256-color index: "208"
+#   - Hex truecolor: "#ff8800"
+#
+# Keys (with their defaults, all overridable):
+#   model     = "14"   # cyan, also bolded
+#   project   = "11"   # yellow
+#   git       = "13"   # magenta — the "git:(...)" wrapper
+#   branch    = "14"   # cyan — branch name + file stats inside git:()
+#   dim       = "8"    # secondary text (durations, tokens, labels)
+#   bar_low   = "10"   # green — context/usage <75%
+#   bar_med   = "11"   # yellow — context/usage 75–89%
+#   bar_high  = "9"    # red — context/usage ≥90%
+#   usage_low = "12"   # blue — usage bars below thresholds (kept distinct from context bar)
+#   agent     = "12"   # blue — active subagent name
+#   worktree  = "11"   # yellow — worktree name
+#   custom    = "208"  # orange — custom_line text
+#   cache_low  = "9"   # red — cache hit rate <50% (poor)
+#   cache_med  = "11"  # yellow — cache hit rate 50–74%
+#   cache_high = "10"  # green — cache hit rate ≥75% (healthy)
+[colors]
+# model = "#7dd3fc"
+# git = "magenta"
+# bar_low = "green"

@@ -1,0 +1,46 @@
+{
+  "cwd": "/Users/nate/_Work/github/natefaerber/claude-statusline",
+  "session_id": "abc123",
+  "session_name": "moonlit-crafting-clover",
+  "transcript_path": "/tmp/transcript.jsonl",
+  "model": {
+    "id": "claude-opus-4-6",
+    "display_name": "Opus"
+  },
+  "workspace": {
+    "current_dir": "/Users/nate/_Work/github/natefaerber/claude-statusline",
+    "project_dir": "/Users/nate/_Work/github/natefaerber/claude-statusline",
+    "added_dirs": [],
+    "git_worktree": ""
+  },
+  "version": "2.1.90",
+  "output_style": { "name": "default" },
+  "cost": {
+    "total_cost_usd": 0.01234,
+    "total_duration_ms": 720000,
+    "total_api_duration_ms": 2300,
+    "total_lines_added": 156,
+    "total_lines_removed": 23
+  },
+  "context_window": {
+    "total_input_tokens": 15234,
+    "total_output_tokens": 4521,
+    "context_window_size": 200000,
+    "used_percentage": 9,
+    "remaining_percentage": 91,
+    "current_usage": {
+      "input_tokens": 8500,
+      "output_tokens": 1200,
+      "cache_creation_input_tokens": 5000,
+      "cache_read_input_tokens": 2000
+    }
+  },
+  "exceeds_200k_tokens": false,
+  "rate_limits": {
+    "five_hour": { "used_percentage": 23.5, "resets_at": 1755302400 },
+    "seven_day": { "used_percentage": 5.2, "resets_at": 1755734400 }
+  },
+  "vim": { "mode": "" },
+  "agent": { "name": "" },
+  "worktree": { "name": "", "path": "", "branch": "", "original_cwd": "", "original_branch": "" }
+}

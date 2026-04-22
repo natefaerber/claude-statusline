@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Build the binary and render sample.json through it.
+# Usage: scripts/preview [--config path] [sample.json]
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+config="./config.example.toml"
+if [[ "${1:-}" == "--config" ]]; then
+  config="$2"
+  shift 2
+fi
+
+sample="${1:-./sample.json}"
+
+go build -o ./claude-statusline ./cmd/claude-statusline
+
+echo "─── config: $config ─────────────────────"
+echo "─── sample: $sample ─────────────────────"
+echo
+< "$sample" ./claude-statusline --config "$config"

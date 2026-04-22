@@ -1,0 +1,48 @@
+[tools]
+go = "1.24"
+
+[env]
+CGO_ENABLED = "0"
+
+[tasks.build]
+description = "Build the binary to ./claude-statusline"
+run = "go build -o ./claude-statusline ./cmd/claude-statusline"
+sources = ["cmd/**/*.go", "internal/**/*.go", "go.mod", "go.sum"]
+outputs = ["./claude-statusline"]
+
+[tasks.install]
+description = "Install to $GOBIN (go install)"
+run = "go install ./cmd/claude-statusline"
+
+[tasks.run]
+description = "Build and render sample.json"
+depends = ["build"]
+run = "./claude-statusline --config ./config.example.toml < ./sample.json"
+
+[tasks.preview]
+description = "Alias for run (build + render sample)"
+depends = ["run"]
+
+[tasks.test]
+description = "Run Go tests"
+run = "go test ./..."
+
+[tasks.fmt]
+description = "Format Go sources"
+run = "go fmt ./..."
+
+[tasks.vet]
+description = "Run go vet"
+run = "go vet ./..."
+
+[tasks.tidy]
+description = "Tidy go.mod / go.sum"
+run = "go mod tidy"
+
+[tasks.check]
+description = "Format + vet + test"
+depends = ["fmt", "vet", "test"]
+
+[tasks.clean]
+description = "Remove built binary"
+run = "rm -f ./claude-statusline"
