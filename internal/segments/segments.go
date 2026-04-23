@@ -208,10 +208,7 @@ func renderProject(c Ctx) string {
 	if dir == "" {
 		return ""
 	}
-	levels := c.Cfg.Segments.PathLevels
-	if levels < 1 {
-		levels = 1
-	}
+	levels := max(c.Cfg.Segments.PathLevels, 1)
 	parts := strings.Split(filepath.ToSlash(dir), "/")
 	cleaned := parts[:0]
 	for _, p := range parts {
@@ -386,7 +383,7 @@ func updateCacheLow(sessionID string, current float64) float64 {
 		fmt.Sscanf(string(data), "%f", &stored)
 	}
 	if stored < 0 || current < stored {
-		_ = os.WriteFile(path, []byte(fmt.Sprintf("%f", current)), 0o644)
+		_ = os.WriteFile(path, fmt.Appendf(nil, "%f", current), 0o644)
 		return current
 	}
 	return stored
@@ -557,7 +554,7 @@ func updateBurnPeak(sessionID string, current float64) float64 {
 		fmt.Sscanf(string(data), "%f", &stored)
 	}
 	if current > stored {
-		_ = os.WriteFile(path, []byte(fmt.Sprintf("%f", current)), 0o644)
+		_ = os.WriteFile(path, fmt.Appendf(nil, "%f", current), 0o644)
 		return current
 	}
 	return stored
@@ -705,7 +702,7 @@ func renderStash(c Ctx) string {
 		return ""
 	}
 	count := 0
-	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+	for line := range strings.SplitSeq(strings.TrimSpace(string(out)), "\n") {
 		if line != "" {
 			count++
 		}
@@ -749,7 +746,7 @@ func renderBranchDiff(c Ctx) string {
 }
 
 func parseShortstat(s string) (added, removed int) {
-	for _, part := range strings.Split(s, ",") {
+	for part := range strings.SplitSeq(s, ",") {
 		part = strings.TrimSpace(part)
 		var n int
 		switch {
@@ -904,10 +901,7 @@ func makeBar(c Ctx, pct float64, width int, color lipgloss.Style) string {
 	if pct > 100 {
 		pct = 100
 	}
-	filled := int((pct / 100.0) * float64(width))
-	if filled > width {
-		filled = width
-	}
+	filled := min(int((pct/100.0)*float64(width)), width)
 	return color.Render(strings.Repeat("█", filled)) + dim(c).Render(strings.Repeat("░", width-filled))
 }
 
