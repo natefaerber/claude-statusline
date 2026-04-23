@@ -1,0 +1,36 @@
+amends "package://github.com/jdx/hk/releases/download/v1.38.0/hk@1.38.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.38.0/hk@1.38.0#/Builtins.pkl"
+
+hooks {
+  ["pre-commit"] {
+    stash = "none"
+    steps {
+      ["go-fmt"] = Builtins.go_fmt
+      ["go-vet"] {
+        glob = List("**/*.go")
+        check = "go vet ./..."
+      }
+      ["go-test"] {
+        glob = List("**/*.go")
+        check = "go test ./..."
+      }
+    }
+  }
+  ["check"] {
+    steps {
+      ["go-build"] {
+        glob = List("**/*.go")
+        check = "go build -v ./..."
+      }
+      ["go-vet"] {
+        glob = List("**/*.go")
+        check = "go vet ./..."
+      }
+      ["go-test"] {
+        glob = List("**/*.go")
+        check = "go test ./..."
+      }
+      ["go-fmt"] = Builtins.go_fmt
+    }
+  }
+}
