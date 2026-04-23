@@ -42,22 +42,19 @@ func Get(name string) (Renderer, bool) { r, ok := registry[name]; return r, ok }
 // Values accept any lipgloss color literal: ANSI names ("red", "brightCyan"),
 // 0-255 indices ("208"), or hex ("#ff8800").
 var defaultColors = map[string]string{
-	"model":     "14", // cyan
-	"project":   "11", // yellow
-	"git":       "13", // magenta
-	"branch":    "14", // cyan
-	"dim":       "8",
-	"bar_low":   "10", // green
-	"bar_med":   "11", // yellow
-	"bar_high":  "9",  // red
-	"usage_low": "12", // blue
-	"agent":     "12", // blue
-	"worktree":  "11", // yellow
-	"custom":    "208",
-	// Cache hit rate uses inverted thresholds — low % is bad, high % is good.
-	"cache_low":  "9",  // red — poor hit rate
-	"cache_med":  "11", // yellow
-	"cache_high": "10", // green — healthy
+	"model":      "14", // cyan
+	"project":    "11", // yellow
+	"git":        "13", // magenta
+	"branch":     "14", // cyan
+	"dim":        "8",
+	"bar_low":    "10", // green
+	"bar_med":    "11", // yellow
+	"bar_high":   "9",  // red
+	"usage_low":  "12", // blue
+	"agent":      "12", // blue
+	"worktree":   "11", // yellow
+	"custom":     "208",
+	"cache_miss": "9", // red — cache bust
 }
 
 func style(c Ctx, key string) lipgloss.Style {
@@ -349,63 +346,22 @@ func renderTokens(c Ctx) string {
 		formatTokens(u.CacheCreationInputTokens+u.CacheReadInputTokens)))
 }
 
-// renderCache shows the prompt cache hit rate: cache_read / (input + cache_create + cache_read).
-// Useful for spotting cache busts — a healthy session sits well above 80%.
-// Optionally tracks the per-session low watermark so a recovery is still
-// visible after the bust resolves.
+// renderCache flags cache busts: the non-cached input tokens this turn.
+// Silent in the steady state — every warm-cache turn is ~100% hit by volume,
+// so a percentage display is always green and never actionable. Instead we
+// render only when the miss (input + cache_create) is large enough to matter,
+// so the segment's visibility IS the signal.
 func renderCache(c Ctx) string {
 	u := c.In.Context.CurrentUsage
-	denom := u.InputTokens + u.CacheCreationInputTokens + u.CacheReadInputTokens
-	if denom == 0 {
+	miss := u.InputTokens + u.CacheCreationInputTokens
+	threshold := c.Cfg.Segments.CacheMissMin
+	if threshold <= 0 {
+		threshold = 5000
+	}
+	if miss < threshold {
 		return ""
 	}
-	ratio := float64(u.CacheReadInputTokens) / float64(denom) * 100
-	color := cacheColor(c, ratio)
-	out := dim(c).Render("cache ") + color.Render(formatPct(ratio))
-
-	if c.Cfg.Segments.CacheShowLow && c.In.SessionID != "" {
-		low := updateCacheLow(c.In.SessionID, ratio)
-		if ratio-low > 10 {
-			out += cacheColor(c, low).Render(fmt.Sprintf(" ⤓%s", formatPct(low)))
-		}
-	}
-	return out
-}
-
-// updateCacheLow tracks the worst (lowest) hit rate seen this session.
-func updateCacheLow(sessionID string, current float64) float64 {
-	path := cacheLowPath(sessionID)
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return current
-	}
-	stored := -1.0
-	if data, err := os.ReadFile(path); err == nil {
-		fmt.Sscanf(string(data), "%f", &stored)
-	}
-	if stored < 0 || current < stored {
-		_ = os.WriteFile(path, fmt.Appendf(nil, "%f", current), 0o644)
-		return current
-	}
-	return stored
-}
-
-func cacheLowPath(sessionID string) string {
-	if dir := os.Getenv("XDG_CACHE_HOME"); dir != "" {
-		return filepath.Join(dir, "claude-statusline", "cache", sessionID)
-	}
-	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".cache", "claude-statusline", "cache", sessionID)
-}
-
-func cacheColor(c Ctx, pct float64) lipgloss.Style {
-	switch {
-	case pct < 50:
-		return style(c, "cache_low")
-	case pct < 75:
-		return style(c, "cache_med")
-	default:
-		return style(c, "cache_high")
-	}
+	return style(c, "cache_miss").Render("cache miss " + formatTokens(miss))
 }
 
 func renderCustom(c Ctx) string {
@@ -542,13 +498,44 @@ func renderBurn(c Ctx) string {
 	return out
 }
 
+// sessionStateTTL bounds how long per-session state files stick around.
+// Long enough that you can resume a session hours later with the peak intact;
+// short enough that thousands of dead session files don't accumulate on disk.
+const sessionStateTTL = 30 * 24 * time.Hour
+
+// sweepOldFiles removes regular files in dir with mtime older than maxAge.
+// Best-effort — any error (missing dir, unreadable entry, failed unlink) is
+// silently swallowed. Safe to call on directories that don't exist.
+func sweepOldFiles(dir string, maxAge time.Duration) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return
+	}
+	cutoff := time.Now().Add(-maxAge)
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		info, err := e.Info()
+		if err != nil {
+			continue
+		}
+		if info.ModTime().Before(cutoff) {
+			_ = os.Remove(filepath.Join(dir, e.Name()))
+		}
+	}
+}
+
 // updateBurnPeak reads, updates, and returns the per-session peak rate.
-// Best-effort: any IO failure just returns the current rate.
+// Best-effort: any IO failure just returns the current rate. Opportunistically
+// sweeps expired siblings so the burn/ dir doesn't grow unbounded.
 func updateBurnPeak(sessionID string, current float64) float64 {
 	path := burnPeakPath(sessionID)
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return current
 	}
+	sweepOldFiles(dir, sessionStateTTL)
 	var stored float64
 	if data, err := os.ReadFile(path); err == nil {
 		fmt.Sscanf(string(data), "%f", &stored)

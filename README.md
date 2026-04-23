@@ -127,7 +127,7 @@ Any segment returns `""` to silently drop itself from its line when it has nothi
 | `cost` | `$0.0123` | Cumulative session cost |
 | `duration` | `⏱  12m` | Session wall-clock |
 | `tokens` | `tok: 15k (in: 8k, out: 1k, cache: 7k)` | Gated by `tokens_min_context_pct` |
-| `cache` | `cache 87%` | Prompt cache hit rate — healthy ≥75%; `cache_show_low` adds session low watermark |
+| `cache` | `cache miss 47k` | Only renders on cache busts (miss ≥ `cache_miss_min`, default 5000 tokens) |
 | `diff` | `+156 -23` | Lines added/removed this session |
 | `burn` | `$1.23/hr` | Extrapolated cost rate; `burn_show_peak` adds session peak |
 | `todos` | `▸ 3/7` | Parsed from the transcript's latest `TodoWrite` |
@@ -223,7 +223,7 @@ bar_low = "green"
 cache_high = "#22c55e"
 ```
 
-Overridable keys: `model`, `project`, `git`, `branch`, `dim`, `bar_low`, `bar_med`, `bar_high`, `usage_low`, `agent`, `worktree`, `custom`, `cache_low`, `cache_med`, `cache_high`. See [`config.example.toml`](./config.example.toml) for the defaults.
+Overridable keys: `model`, `project`, `git`, `branch`, `dim`, `bar_low`, `bar_med`, `bar_high`, `usage_low`, `agent`, `worktree`, `custom`, `cache_miss`. See [`config.example.toml`](./config.example.toml) for the defaults.
 
 `NO_COLOR=1` or `--no-color` strips all ANSI.
 
@@ -235,9 +235,8 @@ Anything persistent lives under `$XDG_CACHE_HOME/claude-statusline/` (or `~/.cac
 |---|---|---|
 | `pomodoro.json` | `pomo start`/`stop` | Active timer |
 | `burn/<session_id>` | `burn` segment | Per-session peak $/hr |
-| `cache/<session_id>` | `cache` segment | Per-session low cache hit % |
 
-`gh` and `docker compose` responses are cached in `$TMPDIR/claude-statusline-{gh,compose}/` (30s and 10s TTLs respectively) and safe to delete at any time.
+Files older than 30 days are swept automatically on each `burn` render. `gh` and `docker compose` responses cache in `$TMPDIR/claude-statusline-{gh,compose}/` (30s and 10s TTLs respectively); safe to delete at any time.
 
 ## Adding a new segment
 

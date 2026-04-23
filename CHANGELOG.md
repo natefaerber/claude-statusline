@@ -4,6 +4,21 @@ All notable changes to this project are documented here. Format follows [Keep a 
 
 ## [Unreleased]
 
+### Changed
+
+- **`cache` segment rewritten.** Instead of a ratio (`cache 87%`), now renders `cache miss Nk` only when non-cached input (`input_tokens + cache_creation_input_tokens`) exceeds `cache_miss_min` (default 5000). Rationale: warm-cache turns are ~100% hit by volume, so the percentage display was always green and carried no signal. Visibility is now the signal.
+- Per-session state files in `$XDG_CACHE_HOME/claude-statusline/burn/` are swept opportunistically on each render — files older than 30 days are removed.
+
+### Removed
+
+- **BREAKING:** `cache_show_low` config key. The low-watermark display is gone with the ratio.
+- Color keys `cache_low`, `cache_med`, `cache_high`. Replaced by a single `cache_miss` key (default red).
+- `$XDG_CACHE_HOME/claude-statusline/cache/` is no longer written. Existing files from 0.1.0 can be safely deleted: `rm -rf ~/.cache/claude-statusline/cache/`.
+
+### Added
+
+- `cache_miss_min` config key (default 5000) for the render threshold on the `cache` segment.
+
 ## [0.1.0] - 2026-04-22
 
 Initial public release.

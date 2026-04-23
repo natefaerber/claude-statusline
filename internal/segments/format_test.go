@@ -1,6 +1,8 @@
 package segments
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -67,6 +69,41 @@ func TestFormatDuration(t *testing.T) {
 			t.Errorf("formatDuration(%v) = %q; want %q", tc.in, got, tc.want)
 		}
 	}
+}
+
+func TestSweepOldFiles(t *testing.T) {
+	dir := t.TempDir()
+	now := time.Now()
+
+	// Fresh file: should survive.
+	fresh := filepath.Join(dir, "fresh")
+	if err := os.WriteFile(fresh, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Expired file: mtime 31 days ago, should be swept.
+	expired := filepath.Join(dir, "expired")
+	if err := os.WriteFile(expired, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	oldTime := now.Add(-31 * 24 * time.Hour)
+	if err := os.Chtimes(expired, oldTime, oldTime); err != nil {
+		t.Fatal(err)
+	}
+
+	sweepOldFiles(dir, 30*24*time.Hour)
+
+	if _, err := os.Stat(fresh); err != nil {
+		t.Errorf("fresh file was removed: %v", err)
+	}
+	if _, err := os.Stat(expired); !os.IsNotExist(err) {
+		t.Errorf("expired file should be gone, got err=%v", err)
+	}
+}
+
+func TestSweepOldFilesMissingDir(t *testing.T) {
+	// Should not panic or error on a nonexistent directory.
+	sweepOldFiles(filepath.Join(t.TempDir(), "does-not-exist"), time.Hour)
 }
 
 func TestParseShortstat(t *testing.T) {

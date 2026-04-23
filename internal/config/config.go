@@ -75,9 +75,12 @@ type SegmentOpts struct {
 	// BurnShowPeak appends the session's high-watermark $/hr next to the
 	// current rate when current is at least 20% below peak.
 	BurnShowPeak bool `toml:"burn_show_peak"`
-	// CacheShowLow appends the session's low-watermark cache hit rate next
-	// to the current rate when current is more than 10pp above low.
-	CacheShowLow bool `toml:"cache_show_low"`
+	// CacheMissMin is the smallest non-cached input (input + cache_create)
+	// in tokens that makes the `cache` segment render. Below this, the
+	// segment stays silent — a warm-cache turn is always near 100% hit and
+	// showing that is noise. Default 5000. Increase to suppress first-turn
+	// cache writes; decrease to catch smaller busts.
+	CacheMissMin int `toml:"cache_miss_min"`
 }
 
 func Default() *Config {

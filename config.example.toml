@@ -10,6 +10,7 @@
 # agent, vim_mode, output_style, version, worktree, custom
 #
 # Notes:
+#   cache          = "cache miss Nk" — only renders on cache busts (miss ≥ cache_miss_min)
 #   diff           = +N -M lines added/removed this session (cost.total_lines_*)
 #   unpushed       = ↑N ↓M commits ahead/behind upstream
 #   ci             = latest commit's CI rollup for current branch (needs `gh`, cached 30s)
@@ -46,6 +47,10 @@ custom_line = ""
 # Hide the `tokens` segment until context usage hits this percent.
 # 0 = always show, 85 = only show when you're actually approaching the limit.
 tokens_min_context_pct = 85
+# `cache` segment stays silent until non-cached input (input + cache_create)
+# this turn exceeds this many tokens. 5000 is a good default — hides routine
+# per-turn user-message tokens, surfaces real cache busts (typically 10k+).
+cache_miss_min = 5000
 
 # Color overrides. Values accept anything lipgloss does:
 #   - ANSI names: "red", "green", "brightCyan", etc.
@@ -64,10 +69,8 @@ tokens_min_context_pct = 85
 #   usage_low = "12"   # blue — usage bars below thresholds (kept distinct from context bar)
 #   agent     = "12"   # blue — active subagent name
 #   worktree  = "11"   # yellow — worktree name
-#   custom    = "208"  # orange — custom_line text
-#   cache_low  = "9"   # red — cache hit rate <50% (poor)
-#   cache_med  = "11"  # yellow — cache hit rate 50–74%
-#   cache_high = "10"  # green — cache hit rate ≥75% (healthy)
+#   custom     = "208" # orange — custom_line text
+#   cache_miss = "9"   # red — "cache miss Nk" bust indicator
 [colors]
 # model = "#7dd3fc"
 # git = "magenta"
