@@ -4,10 +4,14 @@ All notable changes to this project are documented here. Format follows [Keep a 
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-23
+
 ### Changed
 
 - **`cache` segment rewritten.** Instead of a ratio (`cache 87%`), now renders `cache miss Nk` only when non-cached input (`input_tokens + cache_creation_input_tokens`) exceeds `cache_miss_min` (default 5000). Rationale: warm-cache turns are ~100% hit by volume, so the percentage display was always green and carried no signal. Visibility is now the signal.
 - Per-session state files in `$XDG_CACHE_HOME/claude-statusline/burn/` are swept opportunistically on each render — files older than 30 days are removed.
+- README reorganized with rendered sample, segment reference table grouped by data source, subcommand docs, color palette reference, and local-state-file inventory.
+- `segments.go` modernized for Go 1.24: `min`/`max` builtins, `fmt.Appendf`, `strings.SplitSeq`.
 
 ### Removed
 
@@ -18,6 +22,10 @@ All notable changes to this project are documented here. Format follows [Keep a 
 ### Added
 
 - `cache_miss_min` config key (default 5000) for the render threshold on the `cache` segment.
+- `hk.pkl` pre-commit hook config — `go-fmt`/`go-vet`/`go-test` on Go file stages; `hk check` for a full build + test sweep. Contributors: `mise install && hk install`.
+- Unit tests for pure helpers: `endpoints.Parse/Add/Remove/ParseAddArg`, `render.joinCycling`, `segments.{formatPct,formatTokens,formatDuration,parseShortstat,sweepOldFiles}`, `config.Line.EffectiveSeparators`.
+- `CLAUDE.md` architecture guide.
+- `.gitignore` entries for `.claude/settings.local.json` and `.claude/scheduled_tasks.lock`.
 
 ## [0.1.0] - 2026-04-22
 
@@ -42,5 +50,6 @@ Initial public release.
 - GitHub Actions: `ci` (gofmt / vet / test / build) and `release` (GoReleaser on `v*` tag).
 - MIT License.
 
-[Unreleased]: https://github.com/natefaerber/claude-statusline/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/natefaerber/claude-statusline/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/natefaerber/claude-statusline/releases/tag/v0.2.0
 [0.1.0]: https://github.com/natefaerber/claude-statusline/releases/tag/v0.1.0
