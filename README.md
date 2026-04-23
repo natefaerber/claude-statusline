@@ -247,6 +247,14 @@ Files older than 30 days are swept automatically on each `burn` render. `gh` and
 
 See [`CLAUDE.md`](./CLAUDE.md) for the architecture and conventions.
 
+## Contributing
+
+```bash
+mise install    # installs Go + hk
+hk install      # one-time: wires pre-commit → gofmt / vet / test
+hk check        # full sweep on demand (build + vet + test + fmt)
+```
+
 ## Test locally
 
 ```bash
