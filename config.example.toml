@@ -36,6 +36,11 @@ segments = ["context_bar", "usage_5h", "usage_7d"]
 [[lines]]
 segments = ["duration", "tokens"]
 
+# [segments] — global knobs for segment rendering. Keys here apply to every
+# [[lines]] block; they cannot be set inside a [[lines]] block. Adding a
+# segment knob to a [[lines]] block fails with:
+#   claude-statusline: unknown config keys: [lines.<key>]
+# Only `segments`, `separator`, and `separators` are valid inside [[lines]].
 [segments]
 path_levels = 1
 context_value = "percent"     # percent | tokens | both | remaining
