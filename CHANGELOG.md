@@ -4,6 +4,10 @@ All notable changes to this project are documented here. Format follows [Keep a 
 
 ## [Unreleased]
 
+### Added
+
+- `pending_review_scope` config option. Default `"all"` keeps the current org-wide behavior (via `gh search prs`); `"repo"` scopes the count to review requests on the current repository (via `gh pr list`).
+
 ## [0.2.0] - 2026-04-23
 
 ### Changed

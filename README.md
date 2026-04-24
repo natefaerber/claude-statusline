@@ -158,7 +158,7 @@ Degrade silently if `gh` is missing or not authenticated.
 | `ci` | `✓` / `⏳ 2` / `✗ 4/5` | Latest commit's Actions runs on the branch |
 | `pr` | `PR #123 ✓` / `✗` / `👁` | Open PR + review state |
 | `pr_checks` | `checks 8/10 ✓` | Full rollup incl. non-Actions checks |
-| `pending_review` | `👁  3` | PRs across the org requesting your review |
+| `pending_review` | `👁  3` | PRs requesting your review — org-wide by default; set `pending_review_scope = "repo"` to limit to the current repo |
 
 ### From external processes (opt-in, presence-driven)
 

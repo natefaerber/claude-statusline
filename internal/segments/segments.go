@@ -452,14 +452,29 @@ func renderLastCommit(c Ctx) string {
 	return dim(c).Render("commit " + formatDuration(d) + " ago")
 }
 
-// renderPendingReview counts open PRs across the org assigned to the current
-// user for review. Cached 30s. Cross-cwd cache key — same answer everywhere.
+// renderPendingReview counts open PRs assigned to the current user for review.
+// Cached 30s. Scope is configurable: default "all" (org-wide via `gh search`,
+// same answer regardless of cwd) or "repo" (current repo only via `gh pr list`,
+// naturally scoped by git remote).
 func renderPendingReview(c Ctx) string {
 	cwd := c.In.Workspace.CurrentDir
-	out := gh.Run(cwd, "_global_",
-		"search", "prs", "--review-requested", "@me", "--state", "open",
-		"--json", "number", "--limit", "100",
-	)
+	var out string
+	if c.Cfg.Segments.PendingReviewScope == "repo" {
+		if c.Git == nil {
+			return ""
+		}
+		out = gh.Run(cwd, "_repo_",
+			"pr", "list",
+			"--state", "open",
+			"--search", "review-requested:@me",
+			"--json", "number", "--limit", "100",
+		)
+	} else {
+		out = gh.Run(cwd, "_global_",
+			"search", "prs", "--review-requested", "@me", "--state", "open",
+			"--json", "number", "--limit", "100",
+		)
+	}
 	if out == "" {
 		return ""
 	}

@@ -81,6 +81,10 @@ type SegmentOpts struct {
 	// showing that is noise. Default 5000. Increase to suppress first-turn
 	// cache writes; decrease to catch smaller busts.
 	CacheMissMin int `toml:"cache_miss_min"`
+	// PendingReviewScope limits the `pending_review` segment. "" or "all"
+	// (default) searches every repo you can see via `gh search prs`. "repo"
+	// only counts open review requests on the current repo via `gh pr list`.
+	PendingReviewScope string `toml:"pending_review_scope"`
 }
 
 func Default() *Config {

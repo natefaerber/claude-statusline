@@ -19,7 +19,8 @@
 #   stash          = 📦 N when `git stash list` has entries
 #   branch_diff    = +N -M lines vs base_branch (default "main"), drops on the base itself
 #   last_commit    = "commit Xm ago" — nudges you to commit
-#   pending_review = 👁 N PRs across the org with you as a requested reviewer (needs `gh`, cached 30s)
+#   pending_review = 👁 N PRs with you as a requested reviewer — org-wide by default,
+#                    scoped to current repo via pending_review_scope = "repo" (needs `gh`, cached 30s)
 
 separator = " │ "
 
@@ -51,6 +52,9 @@ tokens_min_context_pct = 85
 # this turn exceeds this many tokens. 5000 is a good default — hides routine
 # per-turn user-message tokens, surfaces real cache busts (typically 10k+).
 cache_miss_min = 5000
+# `pending_review` scope: "all" (default) searches every repo via `gh search prs`;
+# "repo" only counts review requests on the current repo via `gh pr list`.
+# pending_review_scope = "repo"
 
 # Color overrides. Values accept anything lipgloss does:
 #   - ANSI names: "red", "green", "brightCyan", etc.
