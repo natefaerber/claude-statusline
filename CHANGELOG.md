@@ -4,6 +4,8 @@ All notable changes to this project are documented here. Format follows [Keep a 
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-06
+
 ### Added
 
 - `pending_review_scope` config option. Default `"all"` keeps the current org-wide behavior (via `gh search prs`); `"repo"` scopes the count to review requests on the current repository (via `gh pr list`).
@@ -54,6 +56,7 @@ Initial public release.
 - GitHub Actions: `ci` (gofmt / vet / test / build) and `release` (GoReleaser on `v*` tag).
 - MIT License.
 
-[Unreleased]: https://github.com/natefaerber/claude-statusline/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/natefaerber/claude-statusline/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/natefaerber/claude-statusline/releases/tag/v0.3.0
 [0.2.0]: https://github.com/natefaerber/claude-statusline/releases/tag/v0.2.0
 [0.1.0]: https://github.com/natefaerber/claude-statusline/releases/tag/v0.1.0
