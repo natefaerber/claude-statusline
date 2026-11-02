@@ -364,11 +364,17 @@ func renderCache(c Ctx) string {
 	return style(c, "cache_miss").Render("cache miss " + formatTokens(miss))
 }
 
+// renderCustom prints custom_line with environment variables expanded ($VAR or ${VAR}), so a
+// launcher can hand the statusline a per-session label: the fleet's claude-as exports
+// LUBBERLAND_CLAUDE_SUBSCRIPTION_LABEL (which Claude subscription the session started on) and a
+// config line `custom_line = "$LUBBERLAND_CLAUDE_SUBSCRIPTION_LABEL"` shows it. A line that
+// expands to nothing is dropped like any empty segment.
 func renderCustom(c Ctx) string {
-	if c.Cfg.Segments.CustomLine == "" {
+	line := strings.TrimSpace(os.ExpandEnv(c.Cfg.Segments.CustomLine))
+	if line == "" {
 		return ""
 	}
-	return style(c, "custom").Render(c.Cfg.Segments.CustomLine)
+	return style(c, "custom").Render(line)
 }
 
 // ghCheck mirrors entries from `gh pr view --json statusCheckRollup`.
